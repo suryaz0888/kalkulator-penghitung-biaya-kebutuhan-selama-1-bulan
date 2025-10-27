@@ -1,0 +1,123 @@
+import datetime
+
+def format_rupiah(angka):
+    """Mengubah angka menjadi format Rupiah (Rp. xxx.xxx)."""
+    return f"Rp. {angka:,.0f}".replace(",", ".")
+
+def dapatkan_budget():
+    """Meminta pengguna memasukkan total budget bulanan."""
+    while True:
+        try:
+            budget = float(input("Masukkan total budget bulanan Anda (contoh: 5000000): "))
+            if budget <= 0:
+                print("Budget harus angka positif.")
+            else:
+                return budget
+        except ValueError:
+            print("Input tidak valid. Harap masukkan angka.")
+
+def tambah_pengeluaran():
+    """Mencatat satu item pengeluaran baru."""
+    deskripsi = input("Masukkan deskripsi pengeluaran (contoh: Kopi susu): ")
+    
+    while True:
+        try:
+            jumlah = float(input("Masukkan jumlah pengeluaran (contoh: 25000): "))
+            if jumlah <= 0:
+                print("Jumlah harus angka positif.")
+            else:
+                break
+        except ValueError:
+            print("Input tidak valid. Harap masukkan angka.")
+
+    kategori = input("Masukkan kategori (contoh: Makanan, Transportasi, Hiburan): ").strip().title()
+    tanggal = datetime.date.today().strftime("%Y-%m-%d")
+    
+    # Kita simpan data dalam bentuk dictionary
+    pengeluaran = {
+        "tanggal": tanggal,
+        "deskripsi": deskripsi,
+        "jumlah": jumlah,
+        "kategori": kategori
+    }
+    
+    print(f"\n✅ Pengeluaran '{deskripsi}' ({format_rupiah(jumlah)}) berhasil dicatat.\n")
+    return pengeluaran
+
+def lihat_ringkasan(daftar_pengeluaran, total_budget):
+    """Menampilkan ringkasan total pengeluaran dan sisa budget."""
+    if not daftar_pengeluaran:
+        print("Belum ada data pengeluaran.")
+        print(f"Budget Anda: {format_rupiah(total_budget)}")
+        print(f"Sisa Budget: {format_rupiah(total_budget)}")
+        return
+
+    total_terpakai = 0
+    pengeluaran_per_kategori = {}
+
+    print("\n--- 📊 RINGKASAN PENGELUARAN 📊 ---")
+    print("=" * 35)
+    
+    # Hitung total dan kelompokkan per kategori
+    for item in daftar_pengeluaran:
+        total_terpakai += item["jumlah"]
+        kategori = item["kategori"]
+        
+        if kategori not in pengeluaran_per_kategori:
+            pengeluaran_per_kategori[kategori] = 0
+        
+        pengeluaran_per_kategori[kategori] += item["jumlah"]
+
+    # Tampilkan rincian per kategori
+    print("Rincian per Kategori:")
+    for kategori, jumlah in pengeluaran_per_kategori.items():
+        print(f"- {kategori:<20}: {format_rupiah(jumlah)}")
+    
+    print("-" * 35)
+    
+    # Tampilkan total
+    sisa_budget = total_budget - total_terpakai
+    print(f"Budget Awal    : {format_rupiah(total_budget)}")
+    print(f"Total Pengeluaran : {format_rupiah(total_terpakai)}")
+    print(f"Sisa Budget       : {format_rupiah(sisa_budget)}")
+    print("=" * 35)
+
+    if sisa_budget < 0:
+        print("\n⚠️ PERINGATAN: Anda sudah melebihi budget! ⚠️")
+    elif sisa_budget < total_budget * 0.1:
+        print("\nCAUTION: Sisa budget Anda tinggal sedikit.")
+    
+    print("\n")
+
+def tampilkan_menu():
+    """Menampilkan menu utama."""
+    print("--- Menu Kalkulator Budget ---")
+    print("1. ➕ Tambah Pengeluaran")
+    print("2. 📊 Lihat Ringkasan")
+    print("3. ❌ Keluar")
+    return input("Pilih opsi (1/2/3): ")
+
+def main():
+    """Fungsi utama untuk menjalankan program."""
+    print("Selamat datang di Kalkulator Pengeluaran Sederhana!")
+    
+    total_budget = dapatkan_budget()
+    daftar_pengeluaran = [] # List untuk menyimpan semua data pengeluaran
+
+    while True:
+        pilihan = tampilkan_menu()
+        
+        if pilihan == '1':
+            item_baru = tambah_pengeluaran()
+            daftar_pengeluaran.append(item_baru)
+        elif pilihan == '2':
+            lihat_ringkasan(daftar_pengeluaran, total_budget)
+        elif pilihan == '3':
+            print("Terima kasih telah menggunakan aplikasi ini. Semoga hemat!")
+            break
+        else:
+            print("Pilihan tidak valid. Silakan pilih 1, 2, atau 3.")
+
+# Menjalankan program utama
+if __name__ == "__main__":
+    main()
